@@ -1,0 +1,47 @@
+{
+  "name": "excel-parser",
+  "version": "0.1.0",
+  "description": "node.js excel parser. Supports xlsx, xls",
+  "homepage": "https://github.com/vxtindia/excel-parser",
+  "main": "excelParser.js",
+  "scripts": {
+    "test": "grunt nodeunit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/vxtindia/excel-parser.git"
+  },
+  "bugs": {
+    "url": "https://github.com/vxtindia/excel-parser/issues"
+  },
+  "keywords": [
+    "excel",
+    "spreadsheet",
+    "xls",
+    "xlsx"
+  ],
+  "author": {
+    "name": "Shekhar R. Thawali",
+    "email": "shekhar.thawali@vxtindia.com"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/vxtindia/datlas/blob/master/LICENSE-MIT"
+    }
+  ],
+  "engines": {
+    "node": "0.8.2"
+  },
+  "dependencies": {
+    "underscore": "~1.4.4",
+    "temp": "~0.5.0"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-jshint": "~0.3.0",
+    "grunt-contrib-nodeunit": "~0.1.2",
+    "grunt-contrib-watch": "~0.3.1",
+    "grunt-contrib-internal": "~0.4.3"
+  }
+}
