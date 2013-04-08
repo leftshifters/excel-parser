@@ -4,9 +4,11 @@
 
 You can install this module using [npm](http://github.com/isaacs/npm):
 
-		npm install excel-parser
+    npm install excel-parser
 
-Requires [python](http://www.python.org/) and [xls2csv](http://search.cpan.org/~ken/xls2csv-1.07/script/xls2csv) to be installed. For system-specific installation view the [Wiki](https://github.com/vxtindia/excel-parser/wiki)
+Requires [python](http://www.python.org/) and [xls2csv](http://search.cpan.org/~ken/xls2csv-1.07/script/xls2csv) to be installed
+
+For system-specific installation view the [Wiki](https://github.com/vxtindia/excel-parser/wiki)
 
 ## API
 
@@ -24,18 +26,18 @@ __Example__
 ```js
 var excelParser = require('excel-parser');
 excelParser.worksheets({
-	inFile: 'my_file.in'
+  inFile: 'my_file.in'
 }, function(err, worksheets){
-	if(err) console.error(err);
-	consol.log(worksheets);
+  if(err) console.error(err);
+  consol.log(worksheets);
 });
 ```
 __Sample output__
 
 ```json
 [
-	{'name': 'Sheet1', id: 1},
-	{'name': 'Sheet2', id: 2}
+  {'name': 'Sheet1', id: 1},
+  {'name': 'Sheet2', id: 2}
 ]
 ```
 ---------------------------------------
@@ -61,25 +63,25 @@ __Example__
 var excelParser = require('excel-parser');
 
 excelParser.parse({
-	inFile: 'my_file.in',
-	worksheet: 1,
-	skipEmpty: true,
-	searchFor: {
-		term: ['my serach term'],
-		type: 'loose'
-	}
-},function(err, worksheets){
-	if(err) console.error(err);
-	consol.log(worksheets);
+  inFile: 'my_file.in',
+  worksheet: 1,
+  skipEmpty: true,
+  searchFor: {
+    term: ['my serach term'],
+    type: 'loose'
+  }
+},function(err, records){
+  if(err) console.error(err);
+  consol.log(records);
 });
 ```
 __Sample output__
 
 ```json
 [
-	['ID', 'Name', 'City'],
-	['1', 'joe', 'Sandy Springs'],
-	['1', 'cole', 'City of Industry']
+  ['ID', 'Name', 'City'],
+  ['1', 'joe', 'Sandy Springs'],
+  ['1', 'cole', 'City of Industry']
 ]
 ```
 
@@ -87,14 +89,21 @@ __Sample output__
 
 There are unit tests in `test/` directory. To run test suite first run the following command to install dependencies.
 
-		npm install
+    npm install
 
 then run the tests:
-		grunt nodeunit
+
+    grunt nodeunit
 
 NOTE: Install `npm install -g grunt-cli` for running tests.
 
 ## License
 
 Copyright (c) 2013 Shekhar R. Thawali
+
 Licensed under the MIT license.
+
+
+## TO DO
+
+* Skip rows support

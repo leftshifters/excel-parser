@@ -20,7 +20,7 @@ var excelParser = {
       return callback(new Error('File not found'));
     }
     _fileType(options.inFile, function(err, type) {
-      var args = ['-x', options.inFile, '-W'];
+      var args = ['-x', path.relative(__dirname, options.inFile), '-W'];
       if(err) {
         callback(err);
       } else {
@@ -67,7 +67,7 @@ var excelParser = {
       return callback(new Error('File not found'));
     }
     _fileType(options.inFile, function(err, type) {
-      var args = ['-x', options.inFile];
+      var args = ['-x', path.relative(__dirname, options.inFile)];
       if(err) {
         callback(err);
       } else if(type === "xls") {
@@ -164,20 +164,6 @@ var _csvParser = function(csvData, options, callback) {
       records = [],
       match = null,
       skipEmpty = options.skipEmpty || false,
-      searchFor = (
-        options.searchFor &&
-        typeof(options.searchFor === 'object') &&
-        typeof(options.searchFor.term === 'object')
-        ) ? options.searchFor.term : null,
-      searchType = (
-        options.searchFor &&
-        typeof(options.searchFor.type === 'string') &&
-        options.searchFor.type &&
-        (
-          options.searchFor.type.trim() === 'strict' ||
-          options.searchFor.type.trim() === 'loose'
-        )) ? options.searchFor.type.trim() : 'loose',
-      searchPattern = null,
       skipEmpty = typeof(options.skipEmpty) === 'boolean' ? options.skipEmpty : false;
 
   var pattern = new RegExp((
@@ -185,15 +171,6 @@ var _csvParser = function(csvData, options, callback) {
     "(?:\"([^\"]*(?:\"\"[^\"]*)*)\"|" +
     "([^\"\\,\\r\\n]*))"
   ), "gi");
-
-  if(searchFor && searchType === 'strict') {
-    searchPattern = _.map(searchFor, function(s) {
-      return "\\b" + s + "\\b";
-    });
-    searchPattern = new RegExp('(' + searchPattern.join('|') + ')', "g");
-  } else if(searchFor && searchType === 'loose') {
-    searchPattern = new RegExp('(' + searchFor.join('|') + ')', "gi");
-  }
 
   while(match = pattern.exec(csvData)) {
     var stringMatched = match[1];
@@ -215,24 +192,58 @@ var _csvParser = function(csvData, options, callback) {
     }
   }
 
-  if(searchPattern) {
-    var _customSearchLoop = function(searchIn) {
-      if(!_.isEmpty(searchIn[excelParser._searchIndex])) {
-        var arrString = searchIn[excelParser._searchIndex].join(' ');
-        if(searchPattern.test(arrString)) {
-          records.push(searchIn[excelParser._searchIndex]);
+  _searchPattern(options, function(err, searchPattern) {
+    if(err) return callback(err);
+    if(searchPattern) {
+      var _customSearchLoop = function(searchIn) {
+        if(!_.isEmpty(searchIn[excelParser._searchIndex])) {
+          var arrString = searchIn[excelParser._searchIndex].join(' ');
+          if(searchPattern.test(arrString)) {
+            records.push(searchIn[excelParser._searchIndex]);
+          }
         }
-      }
-      excelParser._searchIndex++;
-      if(excelParser._searchIndex < searchIn.length) {
-        _customSearchLoop(searchIn);
-      } else {
-        callback(null, records);
-      }
-    };
-    _customSearchLoop(results);
+        excelParser._searchIndex++;
+        if(excelParser._searchIndex < searchIn.length) {
+          _customSearchLoop(searchIn);
+        } else {
+          callback(null, records);
+        }
+      };
+      _customSearchLoop(results);
+    } else {
+      callback(null, results);
+    }
+  });
+
+};
+
+var _searchPattern = function(options, callback){
+  var searchFor = (
+        options.searchFor &&
+        typeof(options.searchFor === 'object') &&
+        typeof(options.searchFor.term === 'object')
+        ) ? options.searchFor.term : null,
+      searchType = (
+        options.searchFor &&
+        typeof(options.searchFor.type === 'string') &&
+        options.searchFor.type &&
+        (
+          options.searchFor.type.trim() === 'strict' ||
+          options.searchFor.type.trim() === 'loose'
+        )) ? options.searchFor.type.trim() : 'loose',
+      searchPattern = null;
+
+  if(searchFor && searchType === 'strict') {
+    searchPattern = _.map(searchFor, function(s) {
+      return "\\b" + s + "\\b";
+    });
+    searchPattern = new RegExp('(' + searchPattern.join('|') + ')', "g");
+    return callback(null, searchPattern);
+  } else if(searchFor && searchType === 'loose') {
+    searchPattern = new RegExp('(' + searchFor.join('|') + ')', "gi");
+    return callback(null, searchPattern);
   } else {
-    callback(null, results);
+    return callback(null, null);
   }
 };
 
@@ -255,6 +266,8 @@ var _pickRecords = function(cmd, args, options, callback) {
               _csvParser(data, options, function(err, records) {
                 if(err) {
                   return callback(err);
+                } else if(records.length < 1) {
+                  return callback(new Error('Records not found'));
                 } else {
                   return callback(null, records);
                 }
