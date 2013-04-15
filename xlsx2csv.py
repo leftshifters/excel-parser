@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 __author__ = "Shekhar R. Thawali <shekhar.thawali@vxtindia.com>"
-__version__ = "0.0.1"
+__version__ = "0.1.1"
 __license__ = "GPL-2+"
 
 import csv, datetime, zipfile, sys, os, json
@@ -348,24 +348,8 @@ class Sheet:
     elif self.in_sheet and name == 'sheetData':
       self.in_sheet = False
 
-def convert_recursive(path, kwargs):
-  for name in os.listdir(path):
-    fullpath = os.path.join(path, name)
-    if os.path.isdir(fullpath):
-      convert_recursive(fullpath, kwargs)
-    else:
-      if fullpath.lower().endswith(".xlsx"):
-        outfilepath = fullpath[:-4] + 'csv'
-        print("Converting %s to %s" %(fullpath, outfilepath))
-        f = open(outfilepath, 'w+b')
-        try:
-          xlsx2csv(fullpath, f, **kwargs)
-        except zipfile.BadZipfile:
-          print("File is not a zip file")
-        f.close()
-
 if __name__ == "__main__":
-  parser = ArgumentParser(usage = "%%prog [options] infile [outfile]", version="0.1")
+  parser = ArgumentParser(usage = "%%prog [options] infile [outfile]")
   parser.add_argument('-x', "--infile", dest="inFile", required = True, help="filename of the source spreadsheet");
   parser.add_argument('-c', "--outfile", dest="outFile", help="filename to save the generated csv file")
   parser.add_argument('-n', "--sheetnumber", dest="sheetId", default=0, type=int, help="sheet no to convert (0 for all sheets)")
