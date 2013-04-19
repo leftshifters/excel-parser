@@ -55,6 +55,7 @@ var excelParser = {
       }
     });
   },
+
   parse: function(options, callback) {
     var self=this, cmd, worksheets, holder =[], i=0, response={};
     if(

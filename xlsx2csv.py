@@ -1,13 +1,35 @@
 #!/usr/bin/env python
 
+# ===================================================
+# THIS SOFTWARE IS BUILD TO WORK BEST WITH THE
+# "excel-parser" NODE PACKAGE.
+# ===================================================
+
 __author__ = "Shekhar R. Thawali <shekhar.thawali@vxtindia.com>"
 __version__ = "0.1.1"
 __license__ = "GPL-2+"
 
-import csv, datetime, zipfile, sys, os, json
+import csv, datetime, zipfile, sys
+import codecs, cStringIO, os, json
 import xml.parsers.expat
 from xml.dom import minidom
-from argparse import ArgumentParser
+
+try:
+  from argparse import ArgumentParser
+except ImportError:
+  print("\n******************************************************************")
+  print("    argparse is required to run this script.")
+  print("    It is available here: https://pypi.python.org/pypi/argparse")
+  print("****************************************************************\n")
+  sys.exit(1)
+try:
+  import xlrd
+except ImportError:
+  print("\n******************************************************************")
+  print("    xlrd is required to run this script.")
+  print("    It is available here: http://pypi.python.org/pypi/xlrd")
+  print("****************************************************************\n")
+  sys.exit(1)
 
 FORMATS = {
   'general' : 'float',
@@ -51,6 +73,7 @@ FORMATS = {
   'mm/dd/yyyy hh:mm:ss' : 'date',
   'yyyy-mm-dd hh:mm:ss' : 'date',
 }
+
 STANDARD_FORMATS = {
   0 : 'general',
   1 : '0',
@@ -82,9 +105,25 @@ STANDARD_FORMATS = {
   49 : '@',
 }
 
-def xlsx2csv(inFile, outFile, sheetFlag, sheetId=0, sheetName="null"):
-  writer = csv.writer(outFile, quoting=csv.QUOTE_MINIMAL, delimiter=',')
-  ziphandle = zipfile.ZipFile(inFile)
+def xlsx2csv(inFile, outFile, sheetFlag, sheetId=0, sheetName=None):
+  fileName, fileExtension = os.path.splitext(inFile)
+  if fileExtension == '.xls':
+    workbook = xlrd.open_workbook(filename=inFile)
+    writer = open(outFile, 'w')
+    convertXls(workbook, sheetFlag, sheetId, sheetName, writer)
+  elif fileExtension == '.xlsx':
+    writer = csv.writer(outFile, quoting=csv.QUOTE_MINIMAL, delimiter=',')
+    ziphandle = zipfile.ZipFile(inFile)
+    convertXlsx(ziphandle, sheetFlag, sheetId, sheetName, writer)
+  else:
+    raise Exception("Invalid file format")
+    sys.exit(1)
+
+def convertXlsx(ziphandle, sheetFlag, sheetId, sheetName, writer):
+  shared_strings = parse(ziphandle, SharedStrings, "xl/sharedStrings.xml")
+  styles = parse(ziphandle, Styles, "xl/styles.xml")
+  workbook = parse(ziphandle, Workbook, "xl/workbook.xml")
+
   try:
     shared_strings = parse(ziphandle, SharedStrings, "xl/sharedStrings.xml")
     styles = parse(ziphandle, Styles, "xl/styles.xml")
@@ -101,6 +140,7 @@ def xlsx2csv(inFile, outFile, sheetFlag, sheetId=0, sheetName="null"):
         value = sheetName
       else:
         raise Exception("Wrong selection")
+        sys.exit(1)
 
       wSheet = None
       for sheet in workbook.sheets:
@@ -109,6 +149,8 @@ def xlsx2csv(inFile, outFile, sheetFlag, sheetId=0, sheetName="null"):
           break
       if not wSheet:
         raise Exception("Sheet %s not found" %value)
+        sys.exit(1)
+
       wSheet.to_csv(writer)
     else:
       for sheet in workbook.sheets:
@@ -116,6 +158,31 @@ def xlsx2csv(inFile, outFile, sheetFlag, sheetId=0, sheetName="null"):
       wSheet.to_csv(writer)
   finally:
     ziphandle.close()
+
+def convertXls(workbook, sheetFlag, sheetId, sheetName, writer):
+  worksheets = []
+  sheetnames = workbook.sheet_names()
+
+  if sheetFlag:
+    for index, sheet in enumerate(sheetnames):
+      worksheets.append({"name": sheet, "id": index+1})
+    print json.JSONEncoder().encode(worksheets)
+  elif sheetId > 0 or sheetName != None:
+    if sheetId > 0:
+      sheetId = sheetId-1
+      wSheet = workbook.sheet_by_index(sheetId)
+    elif sheetName != None:
+      wSheet = workbook.sheet_by_name(sheetName)
+    if not wSheet:
+      raise Exception("Sheet %s bot found" %sheetName)
+    wSheet = XSheet(wSheet, writer)
+    wSheet.to_csv()
+  else:
+    for sheet in sheetnames:
+      wSheet = workbook.sheet_by_name(sheet)
+    wSheet = XSheet(wSheet, writer)
+    wSheet.to_csv()
+  # print test
 
 def parse(ziphandle, klass, filename):
   instance = klass()
@@ -234,7 +301,7 @@ class Sheet:
     self.data = None
 
     self.dateformat = None
-    self.skip_empty_lines = False
+    self.skip_empty_lines = True
 
     self.data = data
     self.workbook = workbook
@@ -347,6 +414,84 @@ class Sheet:
       self.in_row = False
     elif self.in_sheet and name == 'sheetData':
       self.in_sheet = False
+
+class XSheet:
+  def __init__(self, wSheet, writer):
+    self.wSheet = None
+    self.writer = None
+    self.rows = []
+    self.queue = cStringIO.StringIO()
+
+    self.wSheet = wSheet
+    self.writer = writer
+    self.convert()
+
+  def convert(self):
+    if self.wSheet:
+      num_rows = self.wSheet.nrows - 1
+      num_cells = self.wSheet.ncols - 1
+      emptyType = set([xlrd.XL_CELL_BLANK, xlrd.XL_CELL_EMPTY]);
+      curr_row = -1
+      while curr_row < num_rows:
+        curr_row += 1
+        liste = []
+        row = self.wSheet.row(curr_row)
+        if not all(x in emptyType for x in row):
+          curr_cell = -1
+          while curr_cell < num_cells:
+            curr_cell += 1
+            cell_type = self.wSheet.cell_type(curr_row, curr_cell)
+            cell_value = self.wSheet.cell_value(curr_row, curr_cell)
+
+            if cell_type == xlrd.XL_CELL_BOOLEAN or cell_type == xlrd.XL_CELL_NUMBER:
+              try:
+                liste.append(str(int(cell_value)))
+              except (ValueError, OverflowError):
+                liste.append(cell_value)
+            elif cell_type == xlrd.XL_CELL_NUMBER:
+              liste.append(str(cell_value))
+            elif cell_type == xlrd.XL_CELL_DATE:
+              try:
+                cell_value = datetime.datetime(1899, 12, 30) + datetime.timedelta(float(cell_value))
+                format = "d-mmm-yy";
+                dateformat = format.replace("yyyy", "%Y").replace("yy", "%y"). \
+                  replace("hh:mm", "%H:%M").replace("h", "%H").replace("%H%H", "%H").replace("ss", "%S"). \
+                  replace("d", "%e").replace("%e%e", "%d"). \
+                  replace("mmmm", "%B").replace("mmm", "%b").replace(":mm", ":%M").replace("m", "%m").replace("%m%m", "%m"). \
+                  replace("am/pm", "%p")
+                cell_value = cell_value.strftime(str(dateformat)).strip()
+              except (ValueError, OverflowError):
+                # invalid date format
+                cell_value = cell_value
+              liste.append(str(cell_value));
+            else:
+              liste.append(cell_value)
+        self.rows.append(liste)
+
+  def to_csv(self):
+    if self.rows:
+      writer = Writer(self.writer)
+      writer.writerows(self.rows)
+
+class Writer:
+  def __init__(self, f, dialect=csv.excel, encoding="utf-8", **kwds):
+    self.queue = cStringIO.StringIO()
+    self.writer = csv.writer(self.queue, dialect=dialect, **kwds)
+    self.stream = f
+    self.encoder = codecs.getincrementalencoder(encoding)()
+
+  def writerow(self, row):
+    self.writer.writerow([s.encode("utf-8") for s in row])
+    data = self.queue.getvalue()
+    data = data.decode("utf-8")
+    data = self.encoder.encode(data)
+    print data
+    self.stream.write(data)
+    self.queue.truncate(0)
+
+  def writerows(self, rows):
+    for row in rows:
+      self.writerow(row)
 
 if __name__ == "__main__":
   parser = ArgumentParser(usage = "%%prog [options] infile [outfile]")
