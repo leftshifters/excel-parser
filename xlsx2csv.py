@@ -108,8 +108,8 @@ STANDARD_FORMATS = {
 def xlsx2csv(inFile, outFile, sheetFlag, sheetId=0, sheetName=None):
   fileName, fileExtension = os.path.splitext(inFile)
   if fileExtension == '.xls':
+    writer = csv.writer(outFile, quoting=csv.QUOTE_MINIMAL, delimiter=',', dialect="excel")
     workbook = xlrd.open_workbook(filename=inFile)
-    writer = open(outFile, 'w')
     convertXls(workbook, sheetFlag, sheetId, sheetName, writer)
   elif fileExtension == '.xlsx':
     writer = csv.writer(outFile, quoting=csv.QUOTE_MINIMAL, delimiter=',')
@@ -150,7 +150,6 @@ def convertXlsx(ziphandle, sheetFlag, sheetId, sheetName, writer):
       if not wSheet:
         raise Exception("Sheet %s not found" %value)
         sys.exit(1)
-
       wSheet.to_csv(writer)
     else:
       for sheet in workbook.sheets:
@@ -182,7 +181,6 @@ def convertXls(workbook, sheetFlag, sheetId, sheetName, writer):
       wSheet = workbook.sheet_by_name(sheet)
     wSheet = XSheet(wSheet, writer)
     wSheet.to_csv()
-  # print test
 
 def parse(ziphandle, klass, filename):
   instance = klass()
@@ -358,9 +356,6 @@ class Sheet:
               self.data = data
           elif format_type == 'time': # time
             self.data = str(float(data) * 24*60*60)
-    # does not support it
-    #elif self.in_cell_formula:
-    #  self.formula = data
 
   def handleStartElement(self, name, attrs):
     if self.in_row and name == 'c':
@@ -461,37 +456,19 @@ class XSheet:
                   replace("am/pm", "%p")
                 cell_value = cell_value.strftime(str(dateformat)).strip()
               except (ValueError, OverflowError):
-                # invalid date format
                 cell_value = cell_value
               liste.append(str(cell_value));
+            elif cell_type == xlrd.XL_CELL_TEXT:
+              cell_value = cell_value.encode(encoding="UTF-8", errors="strict")
+              liste.append(cell_value)
             else:
               liste.append(cell_value)
         self.rows.append(liste)
 
   def to_csv(self):
     if self.rows:
-      writer = Writer(self.writer)
-      writer.writerows(self.rows)
-
-class Writer:
-  def __init__(self, f, dialect=csv.excel, encoding="utf-8", **kwds):
-    self.queue = cStringIO.StringIO()
-    self.writer = csv.writer(self.queue, dialect=dialect, **kwds)
-    self.stream = f
-    self.encoder = codecs.getincrementalencoder(encoding)()
-
-  def writerow(self, row):
-    self.writer.writerow([s.encode("utf-8") for s in row])
-    data = self.queue.getvalue()
-    data = data.decode("utf-8")
-    data = self.encoder.encode(data)
-    print data
-    self.stream.write(data)
-    self.queue.truncate(0)
-
-  def writerows(self, rows):
-    for row in rows:
-      self.writerow(row)
+      for row in self.rows:
+        self.writer.writerow(row)
 
 if __name__ == "__main__":
   parser = ArgumentParser(usage = "%%prog [options] infile [outfile]")
