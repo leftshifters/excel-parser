@@ -3,9 +3,9 @@ var _ = require('underscore'),
     exec = require('child_process').exec,
     fs = require('fs'),
     path = require('path'),
-    temp = require('temp');
-
-var utils = {}, _this = this;
+    temp = require('temp'),
+    utils = {},
+    _this = this;
 
 var _CRCsv = function(args, cb) {
   temp.mkdir('temp', function(err, dirPath) {
@@ -52,7 +52,7 @@ var _parseCSV = function(csv_data, cb) {
 
 var _skipEmpty = function(records, options, cb) {
   var skipEmpty = false;
-
+  
   if(options.skipEmpty && typeof(options.skipEmpty) === 'boolean')
     skipEmpty = options.skipEmpty;
 
@@ -84,18 +84,14 @@ var _searchInArray = function(records, options, cb) {
     return function(scb) {
       if(!_.isEmpty(record)) {
         var strRow = record.join(' ');
-        if(searchPattern.test(strRow)) searched.push(record);
+        // if(searchPattern.test(strRow)) searched.push(record);
+        scb(null);
       }
-      scb(null);
     }
   }), function(err) {
     if(err) return cb(err);
     cb(null, searched);
   });
-};
-
-var _skipRows = function(records, options, cb) {
-  // TODO: Add skip rows functionality
 };
 
 utils.execute = function(args, cb) {
@@ -118,8 +114,7 @@ utils.pickRecords = function(args, options, cb) {
     function(cb){ _CRCsv(args, cb) },
     function(csv_data, cb){ _parseCSV(csv_data, cb) },
     function(parsedArray, cb) { _skipEmpty(parsedArray, options, cb) },
-    function(parsedArray, cb) { _searchInArray(parsedArray, options, cb) },
-    // function(searchedArray, cb) { _skipRows(searchedArray, options, cb) }
+    function(parsedArray, cb) { _searchInArray(parsedArray, options, cb) }
   ], function(err, parsed) {
     if(err) return cb(err);
     cb(null, parsed);

@@ -1,45 +1,57 @@
 'user strict';
 
-var excelParser = require('../excelParser.js');
+var excelParser = require('../excelParser.js'),
+    parser = {};
 
-exports.parseTest = {
-	xlsParse: function(test) {
-		test.expect(6);
-		excelParser.parse({
-			inFile: __dirname + '/files/multi_worksheets.xls',
-			worksheet: 1
-		}, function(err, records) {
-			test.ok(records, "Successfully parsed all worksheets from multi_worksheets.xls");
-			var a = records[0][0];
-			var e = records[1][2];
-			var i = records[2][3];
-			var o = records[3][4];
-			test.strictEqual(a, 'Names', 'string', "Found header Names");
-			test.strictEqual(e, '96791', 'string', 'Found number 96791');
-			test.strictEqual(i, 'neque.vitae.semper@consectetuer.edu', 'string', "Found email neque.vitae.semper@consectetuer.edu");
-			test.strictEqual(o, '30-May-13', 'string', "Found date 30-May-13");
-			test.ifError(err);
-			test.done();
-		});
-	},
+parser.parse_10000_xls = function(test) {
+  test.expect(4);
+  excelParser.parse({
+    inFile: __dirname + '/files/custom.xls',
+    worksheet: 1
+  }, function(err, results) {
+    var len = results.length,
+        r1 = results[0][0],
+        r10000 = results[results.length-1][0];
 
-	xlsxParse: function(test) {
-		test.expect(6);
-		excelParser.parse({
-			inFile: __dirname + '/files/multi_worksheets.xlsx',
-			worksheet: 1
-		}, function(err, records) {
-			test.ok(records, "Successfully parsed all worksheets from multi_worksheets.xlsx");
-			var a = records[0][0];
-			var e = records[1][2];
-			var i = records[2][3];
-			var o = records[3][4];
-			test.strictEqual(a, 'Names', 'string', "Found header Names");
-			test.strictEqual(e, '96791', 'string', 'Found number 96791');
-			test.strictEqual(i, 'neque.vitae.semper@consectetuer.edu', 'string', "Found email neque.vitae.semper@consectetuer.edu");
-			test.strictEqual(o, '30-May-13', 'string', "Found date 30-May-13");
-			test.ifError(err);
-			test.done();
-		});
-	}
+    test.strictEqual(len, 10000, 'number', 'Should be number');
+    test.strictEqual(r1, 'Name', 'string', 'Should be string');
+    test.strictEqual(r10000, 'Airhole', 'string', 'Should be string');
+    test.ifError(err);
+    test.done();
+  });
 };
+
+parser.parse_10000_xlsx = function(test) {
+  test.expect(4);
+  excelParser.parse({
+    inFile: __dirname + '/files/custom.xlsx',
+    worksheet: 1
+  }, function(err, results) {
+    var len = results.length,
+        r1 = results[0][0],
+        r10000 = results[results.length-1][0];
+
+    test.strictEqual(len, 10000, 'number', 'Should be number');
+    test.strictEqual(r1, 'Name', 'string', 'Should be string');
+    test.strictEqual(r10000, 'Airhole', 'string', 'Should be string');
+    test.ifError(err);
+    test.done();
+  });
+};
+
+parser.searchRowsXls = function(test) {
+  test.expect(0);
+  excelParser.parse({
+    inFile: __dirname + '/files/custom.xls',
+    worksheet: 1,
+    searchFor: {
+      term: ["Airhole"],
+      type: "strict"
+    }
+  }, function(err, results) {
+    console.log(results.length);
+    test.done();
+  });
+};
+
+exports.parser = parser;
