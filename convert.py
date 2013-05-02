@@ -6,7 +6,7 @@
 # ===================================================
 
 __author__ = "Shekhar R. Thawali <shekhar.thawali@vxtindia.com>"
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 __license__ = "GPL-2+"
 
 import csv, datetime, zipfile, sys
@@ -105,7 +105,7 @@ STANDARD_FORMATS = {
   49 : '@',
 }
 
-def xlsx2csv(inFile, outFile, sheetFlag, sheetId=0, sheetName=None):
+def convert2csv(inFile, outFile, sheetFlag, sheetId=0, sheetName=None):
   fileName, fileExtension = os.path.splitext(inFile)
   if fileExtension == '.xls':
     writer = csv.writer(outFile, quoting=csv.QUOTE_MINIMAL, delimiter=',', dialect="excel")
@@ -116,7 +116,7 @@ def xlsx2csv(inFile, outFile, sheetFlag, sheetId=0, sheetName=None):
     ziphandle = zipfile.ZipFile(inFile)
     convertXlsx(ziphandle, sheetFlag, sheetId, sheetName, writer)
   else:
-    raise Exception("Invalid file format")
+    print Exception("Invalid file format")
     sys.exit(1)
 
 def convertXlsx(ziphandle, sheetFlag, sheetId, sheetName, writer):
@@ -139,7 +139,7 @@ def convertXlsx(ziphandle, sheetFlag, sheetId, sheetName, writer):
         field = 'name'
         value = sheetName
       else:
-        raise Exception("Wrong selection")
+        print Exception("Wrong selection")
         sys.exit(1)
 
       wSheet = None
@@ -148,7 +148,7 @@ def convertXlsx(ziphandle, sheetFlag, sheetId, sheetName, writer):
           wSheet = Sheet(workbook, shared_strings, styles, ziphandle.read("xl/worksheets/sheet%i.xml" %sheet['id']))
           break
       if not wSheet:
-        raise Exception("Sheet %s not found" %value)
+        print Exception("Sheet %s not found" %value)
         sys.exit(1)
       wSheet.to_csv(writer)
     else:
@@ -169,11 +169,16 @@ def convertXls(workbook, sheetFlag, sheetId, sheetName, writer):
   elif sheetId > 0 or sheetName != None:
     if sheetId > 0:
       sheetId = sheetId-1
-      wSheet = workbook.sheet_by_index(sheetId)
+      try:
+        wSheet = workbook.sheet_by_index(sheetId)
+      except:
+        print Exception("Sheet %s not found" %sheetId)
     elif sheetName != None:
-      wSheet = workbook.sheet_by_name(sheetName)
-    if not wSheet:
-      raise Exception("Sheet %s bot found" %sheetName)
+      try:
+        wSheet = workbook.sheet_by_name(sheetName)
+      except:
+        print Exception("Sheet '%s' not found" %sheetName)
+
     wSheet = XSheet(wSheet, writer)
     wSheet.to_csv()
   else:
@@ -483,7 +488,7 @@ if __name__ == "__main__":
     parser.print_help()
   else:
     if args.sheetFlag:
-      xlsx2csv(args.inFile, sys.stdout, args.sheetFlag)
+      convert2csv(args.inFile, sys.stdout, args.sheetFlag)
     else:
       if args.inFile:
         if args.outFile:
@@ -491,7 +496,7 @@ if __name__ == "__main__":
         else:
           outfile = open('convert.csv', 'w+b');
 
-        xlsx2csv(args.inFile, outfile, args.sheetFlag, args.sheetId, args.sheetName)
+        convert2csv(args.inFile, outfile, args.sheetFlag, args.sheetId, args.sheetName)
         outfile.close()
       else:
         parser.error("File is required")

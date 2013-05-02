@@ -23,6 +23,7 @@ var _CRCsv = function(args, cb) {
 };
 
 var _parseCSV = function(csv_data, cb) {
+  if(!csv_data) return cb(null, []);
   var pattern = /(\,|\r?\n|\r|^)(?:"([^"]*(?:""[^"]*)*)"|([^"\,\r\n]*))/gi,
       data = [[]],
       matched = [],
@@ -51,8 +52,9 @@ var _parseCSV = function(csv_data, cb) {
 };
 
 var _skipEmpty = function(records, options, cb) {
+  if(_.isEmpty(records)) return cb(null, []);
+
   var skipEmpty = false;
-  
   if(options.skipEmpty && typeof(options.skipEmpty) === 'boolean')
     skipEmpty = options.skipEmpty;
 
@@ -61,11 +63,14 @@ var _skipEmpty = function(records, options, cb) {
 };
 
 var _searchInArray = function(records, options, cb) {
+  if(_.isEmpty(records)) return cb(null, []);
   var term, s = "strict", searchType = l = "loose", searchPattern, searched=[];
   if(!options.searchFor) return cb(null, records);
   if(!options.searchFor.term && options.searchFor.term !== 'object')
     return cb(null, records);
-  term = options.searchFor.term;
+  term = _.map(options.searchFor.term, function(t) {
+    return t.replace(/\//g, '');
+  });
 
   if(
     options.searchFor.type &&
@@ -80,29 +85,22 @@ var _searchInArray = function(records, options, cb) {
     searchPattern = new RegExp('(' + searchPattern.join('|') + ')', "g");
   } else searchPattern = new RegExp('(' + term.join('|') + ')', "gi");
 
-  async.series(_.map(records, function(record) {
-    return function(scb) {
-      if(!_.isEmpty(record)) {
-        var strRow = record.join(' ');
-        // if(searchPattern.test(strRow)) searched.push(record);
-        scb(null);
-      }
-    }
-  }), function(err) {
-    if(err) return cb(err);
-    cb(null, searched);
-  });
+  for(var i=0, len=records.length; i< len; ++i) {
+    var strRow = records[i].join(' ').replace(/\//g, '');
+    if(searchPattern.test(strRow)) searched.push(records[i]);
+  }
+  cb(null, searched);
 };
 
 utils.execute = function(args, cb) {
-  var cmd = ["python", __dirname + "/xlsx2csv.py"];
+  var cmd = ["python", __dirname + "/convert.py"];
   cmd = cmd.concat(args);
   exec(
     cmd.join(' '),
     {cwd: __dirname},
     function(err, stdout, stderr) {
-      if(err) return cb(new Error(err));
-      if(stderr) return cb(new Error(stderr));
+      if(err) return cb(err);
+      if(stderr) return cb(stderr);
       cb(null, stdout);
     }
   );

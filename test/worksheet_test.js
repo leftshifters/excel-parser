@@ -4,7 +4,7 @@ var excelParser = require('../excelParser.js'),
 
 worksheets.fromXls = function(test) {
 	test.expect(4);
-	excelParser.worksheets({inFile: __dirname + '/files/custom.xls'}, function(err, worksheets){
+	excelParser.worksheets({inFile: __dirname + '/master.xls'}, function(err, worksheets){
 		test.ok(worksheets, "Found all the worksheets");
 		var s1 = worksheets[0].name;
 		var i2 = worksheets[1].id;
@@ -17,7 +17,7 @@ worksheets.fromXls = function(test) {
 
 worksheets.fromXlsx = function(test) {
 	test.expect(4);
-	excelParser.worksheets({inFile: __dirname + '/files/custom.xlsx'}, function(err, worksheets){
+	excelParser.worksheets({inFile: __dirname + '/master.xlsx'}, function(err, worksheets){
 		test.ok(worksheets, "Found all the worksheets");
 		var s1 = worksheets[0].name;
 		var i2 = worksheets[1].id;
