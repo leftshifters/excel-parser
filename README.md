@@ -6,7 +6,7 @@ You can install this module using [npm](http://github.com/isaacs/npm):
 
     npm install excel-parser
 
-Requires [python](http://www.python.org/) and [xls2csv](http://search.cpan.org/~ken/xls2csv-1.07/script/xls2csv) to be installed
+Requires [python](http://www.python.org/) to be installed
 
 For system-specific installation view the [Wiki](https://github.com/vxtindia/excel-parser/wiki)
 
@@ -102,8 +102,3 @@ NOTE: Install `npm install -g grunt-cli` for running tests.
 Copyright (c) 2013 Shekhar R. Thawali
 
 Licensed under the MIT license.
-
-
-## TO DO
-
-* Skip rows support
