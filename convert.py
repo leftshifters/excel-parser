@@ -161,6 +161,7 @@ def convertXlsx(ziphandle, sheetFlag, sheetId, sheetName, writer):
 def convertXls(workbook, sheetFlag, sheetId, sheetName, writer):
   worksheets = []
   sheetnames = workbook.sheet_names()
+  wSheet = None
 
   if sheetFlag:
     for index, sheet in enumerate(sheetnames):
@@ -171,13 +172,17 @@ def convertXls(workbook, sheetFlag, sheetId, sheetName, writer):
       sheetId = sheetId-1
       try:
         wSheet = workbook.sheet_by_index(sheetId)
-      except:
+      except Exception as ex:
         print Exception("Sheet %s not found" %sheetId)
     elif sheetName != None:
       try:
         wSheet = workbook.sheet_by_name(sheetName)
-      except:
+      except Exception as ex:
         print Exception("Sheet '%s' not found" %sheetName)
+
+    if not wSheet:
+      print Exception("Sheet %s not found" %sheetName)
+      sys.exit(1)
 
     wSheet = XSheet(wSheet, writer)
     wSheet.to_csv()
@@ -206,7 +211,7 @@ class Workbook:
       self.appName = workbookDoc.firstChild.getElementsByTagName("fileVersion")[0]._attrs['appName'].value
     try:
       self.date1904 = workbookDoc.firstChild.getElementsByTagName("workbookPr")[0]._attrs['date1904'].value.lower().strip() != "false"
-    except:
+    except Exception as ex:
       pass
 
     sheets = workbookDoc.firstChild.getElementsByTagName("sheets")[0]
