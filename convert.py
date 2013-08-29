@@ -464,7 +464,7 @@ class XSheet:
                 cell_value = cell_value
               liste.append(str(cell_value));
             elif cell_type == xlrd.XL_CELL_TEXT:
-              cell_value = cell_value.encode(encoding="UTF-8", errors="strict")
+              cell_value = cell_value.encode("UTF-8", "strict")
               liste.append(cell_value)
             else:
               liste.append(cell_value)
