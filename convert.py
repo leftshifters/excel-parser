@@ -448,7 +448,7 @@ class XSheet:
             cell_type = self.wSheet.cell_type(curr_row, curr_cell)
             cell_value = self.wSheet.cell_value(curr_row, curr_cell)
 
-            if cell_type == xlrd.XL_CELL_BOOLEAN or cell_type == xlrd.XL_CELL_NUMBER:
+            if cell_type == xlrd.XL_CELL_BOOLEAN:
               try:
                 liste.append(str(int(cell_value)))
               except (ValueError, OverflowError):
