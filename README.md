@@ -6,7 +6,12 @@ You can install this module using [npm](http://github.com/isaacs/npm):
 
     npm install excel-parser
 
-Requires [python](http://www.python.org/) to be installed
+Requires [python](http://www.python.org/) to be installed. Python modules are also required: `argparse` and `xlrd`
+To install them:
+```
+pip install argparse
+pip install xlrd
+```
 
 For system-specific installation view the [Wiki](https://github.com/vxtindia/excel-parser/wiki)
 
