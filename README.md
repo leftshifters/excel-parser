@@ -34,7 +34,7 @@ excelParser.worksheets({
   inFile: 'my_file.in'
 }, function(err, worksheets){
   if(err) console.error(err);
-  consol.log(worksheets);
+  console.log(worksheets);
 });
 ```
 __Sample output__
