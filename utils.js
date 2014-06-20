@@ -87,6 +87,7 @@ var _searchInArray = function(records, options, cb) {
 
   for(var i=0, len=records.length; i< len; ++i) {
     var strRow = records[i].join(' ').replace(/\//g, '');
+    searchPattern.lastIndex = 0;
     if(searchPattern.test(strRow)) searched.push(records[i]);
   }
   cb(null, searched);
