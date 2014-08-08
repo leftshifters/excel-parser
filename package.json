@@ -1,6 +1,6 @@
 {
   "name": "excel-parser",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "node.js excel parser. Supports xlsx, xls",
   "homepage": "https://github.com/vxtindia/excel-parser",
   "main": "excelParser.js",
