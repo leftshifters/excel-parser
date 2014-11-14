@@ -100,8 +100,7 @@ utils.execute = function(args, cb) {
     cmd.join(' '),
     {cwd: __dirname},
     function(err, stdout, stderr) {
-      if(err) return cb(err);
-      if(stderr) return cb(stderr);
+      if(err || stderr) return cb(err.toString() + stderr.toString());
       cb(null, stdout);
     }
   );
