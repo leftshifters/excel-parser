@@ -34,9 +34,10 @@
     "node": "~0.8.2"
   },
   "dependencies": {
-    "underscore": "~1.4.4",
+    "async": "~0.2.7",
+    "grunt-contrib-nodeunit": "^1.0.0",
     "temp": "~0.5.0",
-    "async": "~0.2.7"
+    "underscore": "~1.4.4"
   },
   "devDependencies": {
     "grunt": "~0.4.1",

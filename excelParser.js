@@ -44,9 +44,9 @@ excelParser.parse = function(options, cb) {
               rcb(null);
             });
           }
-        }), function(err, parsed) {
+        }), function(err) {
           if(err) return cb(err);
-          cb(null, parsed);
+          cb(null, records);
         });
       });
     } else {
