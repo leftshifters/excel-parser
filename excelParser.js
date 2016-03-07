@@ -46,7 +46,7 @@ excelParser.parse = function(options, cb) {
           }
         }), function(err, parsed) {
           if(err) return cb(err);
-          cb(null, parsed);
+          cb(null, records);
         });
       });
     } else {
