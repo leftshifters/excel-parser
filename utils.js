@@ -98,7 +98,7 @@ utils.execute = function(args, cb) {
   cmd = cmd.concat(args);
   exec(
     cmd.join(' '),
-    {cwd: __dirname},
+    {cwd: __dirname,shell: ''},
     function(err, stdout, stderr) {
       if(err || stderr) return cb(err.toString() + stderr.toString());
       cb(null, stdout);
