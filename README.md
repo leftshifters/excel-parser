@@ -57,6 +57,7 @@ __Arguments__
 * worksheet - Worksheet name or Id to parse. If nothing specified then default
 is 0 and parsed all the worksheets.
 * skipEmpty - boolean `true` or `false`. Pass true if want to skip empty cells from spreadsheet.
+* skipEmptyLines - boolean `true` or `false`. Pass false if you want to keep empty lines from spreadsheet. Default is `true`.
 * searchFor - Object with `term` and `type` values. If you want to get limited
 matching rows from spreadsheet then add the matching string array and one of the following search type.
 ** 'strict' is for the case sensetive and exact string matched.
