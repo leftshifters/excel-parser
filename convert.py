@@ -309,7 +309,7 @@ class Sheet:
     self.data = None
 
     self.dateformat = None
-    self.skip_empty_lines = True
+    self.skip_empty_lines = not args.includeEmpty
 
     self.data = data
     self.workbook = workbook
@@ -487,6 +487,7 @@ if __name__ == "__main__":
   parser.add_argument('-n', "--sheetnumber", dest="sheetId", default=0, type=int, help="sheet no to convert (0 for all sheets)")
   parser.add_argument("-w", "--sheetname", dest="sheetName", type=str, help="sheet name to convert", default=None);
   parser.add_argument("-W", "--worksheets", dest="sheetFlag", help="list all worksheets inside specified spreadsheet", action="store_true");
+  parser.add_argument("-S", "--include-empty-lines", dest="includeEmpty", help="do not skip empty lines", action="store_true", default=False);
 
   args = parser.parse_args()
   if not len(sys.argv) > 1:
@@ -501,6 +502,7 @@ if __name__ == "__main__":
         else:
           outfile = open('convert.csv', 'w+b');
 
+        outfile.write(str((args.includeEmpty, '\n')))
         convert2csv(args.inFile, outfile, args.sheetFlag, args.sheetId, args.sheetName)
         outfile.close()
       else:

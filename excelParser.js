@@ -57,8 +57,12 @@ excelParser.parse = function(options, cb) {
       } else {
         return callback(new Error('"worksheet" should be string or intiger'));
       }
+
+      if(typeof options.skipEmptyLines !== 'undefined' && options.skipEmptyLines === false) {
+        args.push('--include-empty-lines')
+      }
       utils.pickRecords(args, options, function(err, parsed) {
-        if(err) return cb(err);
+        if(err) throw err;
         cb(null, parsed);
       });
     }

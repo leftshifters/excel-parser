@@ -153,6 +153,36 @@ parser.skipEmptyForXlsx = function(test) {
   });
 }
 
+parser.skipEmptyLinesForXls = function(test) {
+  test.expect(3);
+  excelParser.parse({
+    inFile: __dirname + '/master.xls',
+    worksheet: 1,
+    skipEmptyLines: true
+  }, function(err, records) {
+    test.ok(records, "Successfully parsed all worksheets from multi_worksheets.xls");
+    var a = records.length;
+    test.strictEqual(a, 9995, 'number', "Found 9995 records");
+    test.ifError(err);
+    test.done();
+  });
+}
+
+parser.skipEmptyLinesForXlsx = function(test) {
+  test.expect(3);
+  excelParser.parse({
+    inFile: __dirname + '/master.xlsx',
+    worksheet: 1,
+    skipEmptyLines: true
+  }, function(err, records) {
+    test.ok(records, "Successfully parsed all worksheets from multi_worksheets.xls");
+    var a = records.length;
+    test.strictEqual(a, 9995, 'number', "Found 9995 records");
+    test.ifError(err);
+    test.done();
+  });
+}
+
 parser.emptyWorksheetForXls = function(test) {
   test.expect(2);
   excelParser.parse({
