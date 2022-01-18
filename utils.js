@@ -1,11 +1,12 @@
 var _ = require('underscore'),
     async = require('async'),
+    execFile = require('child_process').execFile,
     exec = require('child_process').exec,
     fs = require('fs'),
     path = require('path'),
     temp = require('temp'),
     utils = {},
-    _this = this;
+    _config = {};
 
 var _CRCsv = function(args, cb) {
   temp.mkdir('temp', function(err, dirPath) {
@@ -94,16 +95,30 @@ var _searchInArray = function(records, options, cb) {
 };
 
 utils.execute = function(args, cb) {
-  var cmd = ["python", __dirname + "/convert.py"];
-  cmd = cmd.concat(args);
-  exec(
-    cmd.join(' '),
-    {cwd: __dirname},
-    function(err, stdout, stderr) {
-      if(err || stderr) return cb(err.toString() + stderr.toString());
-      cb(null, stdout);
-    }
-  );
+  if(_config.python) {
+    var cmd = [__dirname + "/convert.py"];
+    cmd = cmd.concat(args);
+    execFile(
+      _config.python,
+      cmd,
+      {cwd: __dirname},
+      function(err, stdout, stderr) {
+        if(err || stderr) return cb(err.toString() + stderr.toString());
+        cb(null, stdout);
+      }
+    );
+  }else{
+    var cmd = ["python", __dirname + "/convert.py"];
+    cmd = cmd.concat(args);
+    exec(
+        cmd.join(' '),
+        {cwd: __dirname},
+        function(err, stdout, stderr) {
+            if(err || stderr) return cb(err.toString() + stderr.toString());
+            cb(null, stdout);
+        }
+    );
+  }
 };
 
 utils.pickRecords = function(args, options, cb) {
@@ -117,6 +132,10 @@ utils.pickRecords = function(args, options, cb) {
     if(err) return cb(err);
     cb(null, parsed);
   });
+};
+
+utils.config = function(config){
+  _config = config
 };
 
 exports.utils = utils;

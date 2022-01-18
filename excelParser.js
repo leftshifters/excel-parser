@@ -13,7 +13,7 @@ excelParser.worksheets = function(options, cb) {
 
   fs.exists(options.inFile, function(exists) {
     if(!exists) return cb("File not found");
-    args = ['-x', '"'+path.relative(__dirname, options.inFile)+'"', '-W'];
+    args = ['-x', path.relative(__dirname, options.inFile), '-W'];
     utils.execute(args, function(err, stdout) {
       if(err) return cb(err);
       worksheets = _.compact(stdout.split(/\n/));
@@ -30,7 +30,7 @@ excelParser.parse = function(options, cb) {
   else if(!options.inFile) return cb("File is missing in arguments");
   fs.exists(options.inFile, function(exists) {
     if(!exists) return cb("File not found");
-    args = ['-x', '"'+path.relative(__dirname, options.inFile)+'"'];
+    args = ['-x', path.relative(__dirname, options.inFile)];
     if(!options.worksheet) {
       var records = [];
       _this.worksheets(options, function(err, worksheets) {
@@ -63,5 +63,9 @@ excelParser.parse = function(options, cb) {
       });
     }
   });
+};
+
+excelParser.config = function(config){
+  utils.config(config);
 };
 module.exports = excelParser;

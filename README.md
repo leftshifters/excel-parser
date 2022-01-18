@@ -89,6 +89,13 @@ __Sample output__
   ['1', 'cole', 'City of Industry']
 ]
 ```
+## Notes
+
+If you are executing this package in non-shell based environment, you would have to pass the python path.
+```javascript
+excelParser.config({python: '/usr/bin/python'})
+```
+
 
 ## Running Tests
 
