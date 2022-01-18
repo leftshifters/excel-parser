@@ -31,18 +31,18 @@
     }
   ],
   "engines": {
-    "node": "~0.8.2"
+    "node": "~17.3.1"
   },
   "dependencies": {
-    "underscore": "~1.4.4",
-    "temp": "~0.5.0",
-    "async": "~0.2.7"
+    "async": "~3.2.3",
+    "temp": "~0.9.4",
+    "underscore": "~1.13.2"
   },
   "devDependencies": {
-    "grunt": "~0.4.1",
-    "grunt-contrib-jshint": "~0.3.0",
-    "grunt-contrib-nodeunit": "~0.1.2",
-    "grunt-contrib-watch": "~0.3.1",
-    "grunt-contrib-internal": "~0.4.3"
+    "grunt": "~1.4.1",
+    "grunt-contrib-internal": "~7.0.0",
+    "grunt-contrib-jshint": "~3.1.1",
+    "grunt-contrib-nodeunit": "~4.0.0",
+    "grunt-contrib-watch": "~1.1.0"
   }
 }
