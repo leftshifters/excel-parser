@@ -12,13 +12,15 @@ var _CRCsv = function(args, cb) {
     if(err) return cb(err);
     csvFile = path.join(dirPath, 'convert.csv');
     args.push('-c', csvFile);
-    utils.execute(args, function(err, stdout) {
-      if(err) return cb(err);
-      fs.readFile(csvFile, 'utf-8', function(err, csv_data) {
+    !function(f){
+      utils.execute(args, function(err, stdout) {
         if(err) return cb(err);
-        cb(null, csv_data);
+        fs.readFile(f, 'utf-8', function(err, csv_data) {
+          if(err) return cb(err);
+          cb(null, csv_data);
+        });
       });
-    });
+    }(csvFile);
   });
 };
 
